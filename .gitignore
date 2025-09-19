@@ -1,0 +1,13 @@
+# dependencies
+node_modules/
+
+# environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+server/.env
+client/.env
+
+# ... rest of your existing .gitignore content
