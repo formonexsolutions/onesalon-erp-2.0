@@ -7,7 +7,7 @@ import { useState } from 'react';
 // The old CSS imports have been removed from here
 
 const Calendar = () => {
-    const [events, setEvents] = useState([
+    const [events] = useState([
         { title: 'Haircut with Sarah', start: new Date() },
         { 
           title: 'Team Meeting', 

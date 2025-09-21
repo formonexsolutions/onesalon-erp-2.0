@@ -6,8 +6,6 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useDispatch } from 'react-redux';
-import { login } from '../redux/authSlice';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -23,12 +21,21 @@ const registrationSchema = z.object({
   salonName: z.string().min(3, 'Salon name must be at least 3 characters'),
   adminName: z.string().min(3, 'Admin name must be at least 3 characters'),
   phoneNumber: z.string().regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit phone number'),
+  email: z.string().email('Please enter a valid email address'),
   gst: z.string().regex(/^[0-9A-Z]{15}$/, 'Please enter a valid 15-character GST number').optional().or(z.literal('')),
   password: passwordSchema,
   confirmPassword: z.string(),
   state: z.string().min(1, 'State is required'),
   city: z.string().min(1, 'City is required'),
+  area: z.string().min(1, 'Area is required'),
   address: z.string().min(5, 'Address must be at least 5 characters'),
+  timingsFrom: z.string().min(1, 'Opening time is required'),
+  timingsTo: z.string().min(1, 'Closing time is required'),
+  numberOfChairs: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+    message: 'Number of chairs must be a positive number',
+  }),
+  holidays: z.array(z.string()).optional(),
+  aboutBranch: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -39,7 +46,6 @@ type RegistrationFormInputs = z.infer<typeof registrationSchema>;
 // --- 2. Registration Page Component (with input filtering) ---
 const RegisterSalon = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -55,10 +61,16 @@ const RegisterSalon = () => {
   const handleRegistrationSubmit = async (data: RegistrationFormInputs) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}/api/salons/register`, data);
-      dispatch(login({ user: response.data, token: 'token_from_cookie' }));
-      toast.success('Registration successful!');
-      navigate('/dashboard');
+      // Convert numberOfChairs to number and prepare holidays array
+      const submitData = {
+        ...data,
+        numberOfChairs: Number(data.numberOfChairs),
+        holidays: data.holidays || []
+      };
+      
+      await axios.post(`${BASE_URL}/api/salons/register`, submitData);
+      toast.success('Registration submitted successfully! Your application is under review.');
+      navigate('/login'); // Redirect to login since auto-login is disabled
     } catch (error: any) {
       toast.error(error.response?.data?.msg || 'Registration failed. Please try again.');
     } finally {

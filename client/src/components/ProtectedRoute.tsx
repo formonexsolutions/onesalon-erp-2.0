@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { selectAuth } from '../redux/authSlice';
 
 interface ProtectedRouteProps {
-  allowedRoles?: string[]; // e.g., ['admin', 'dealer']
+  allowedRoles?: string[]; // e.g., ['admin', 'dealer', 'superadmin']
 }
 
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
@@ -11,9 +11,12 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to. This allows us to send them back after they log in.
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Determine redirect path based on the current route
+    const isSupeAdminRoute = location.pathname.startsWith('/super-admin');
+    const redirectTo = isSupeAdminRoute ? '/super-admin/login' : '/LoginPage';
+    
+    // Redirect them to the appropriate login page, but save the current location
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
   // If allowedRoles are specified, check if the user's role is included

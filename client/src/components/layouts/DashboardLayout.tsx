@@ -27,6 +27,8 @@ const DashboardLayout = () => {
     { name: 'Billing', href: `/branch/${branchId}/billing`, icon: CreditCardIcon },
     { name: 'Services', href: `/branch/${branchId}/services`, icon: SparklesIcon },
     { name: 'Inventory', href: `/branch/${branchId}/inventory`, icon: CubeIcon },
+    { name: 'Staff', href: `/branch/${branchId}/staff`, icon: UserGroupIcon },
+    { name: 'Financial', href: `/branch/${branchId}/financial`, icon: CreditCardIcon },
     { name: 'Employees', href: `/branch/${branchId}/employees`, icon: UserGroupIcon },
     { name: 'Reports', href: `/branch/${branchId}/reports`, icon: ChartPieIcon },
     { name: 'Marketing', href: `/branch/${branchId}/marketing`, icon: MegaphoneIcon },

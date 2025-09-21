@@ -51,7 +51,23 @@ exports.registerSalon = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { salonName, adminName, phoneNumber, password, gst, state, city, address } = req.body;
+  const { 
+    salonName, 
+    adminName, 
+    phoneNumber, 
+    email,
+    password, 
+    gst, 
+    state, 
+    city, 
+    area,
+    address,
+    timingsFrom,
+    timingsTo,
+    numberOfChairs,
+    holidays,
+    aboutBranch
+  } = req.body;
 
   try {
     // Check if a staff member with this phone number already exists
@@ -60,22 +76,51 @@ exports.registerSalon = async (req, res) => {
       return res.status(400).json({ msg: 'A user with this phone number already exists' });
     }
 
-    // Step 1: Create the Salon entity
-    const newSalon = new Salon({ salonName, gst, state, city, address });
+    // Check if email already exists
+    let emailExists = await Staff.findOne({ email });
+    if (emailExists) {
+      return res.status(400).json({ msg: 'A user with this email already exists' });
+    }
+
+    // Step 1: Create the Salon entity with pending status
+    const newSalon = new Salon({ 
+      salonName, 
+      adminName,
+      phoneNumber,
+      email,
+      gst, 
+      state, 
+      city, 
+      area,
+      address,
+      timingsFrom,
+      timingsTo,
+      numberOfChairs,
+      holidays: holidays || [],
+      aboutBranch,
+      status: 'pending' // Salon needs approval
+    });
     await newSalon.save();
 
     // Step 2: Create the first Staff member (the admin) and link them to the new salon
     const newStaff = new Staff({
       name: adminName,
       phoneNumber,
+      email,
       password,
       role: 'salonadmin',
-      salonId: newSalon._id, // Link to the salon we just created
+      salonId: newSalon._id,
+      gender: 'male', // Default, can be updated later
+      isActive: false // Will be activated when salon is approved
     });
     await newStaff.save();
 
-    // Step 3: Log the new admin in immediately
-    setLoginCookieAndRespond(res, newStaff);
+    // Step 3: Return success message (don't auto-login since salon needs approval)
+    res.status(201).json({
+      msg: 'Salon registration submitted successfully. Your application is under review and you will be notified once approved.',
+      salonId: newSalon._id,
+      status: 'pending'
+    });
 
   } catch (err) {
     console.error(err.message);
@@ -93,10 +138,23 @@ exports.loginWithPassword = async (req, res) => {
   const { phoneNumber, password } = req.body;
 
   try {
-    // Now we check the Staff collection, not the Salon collection
-    const staff = await Staff.findOne({ phoneNumber });
+    // Find the staff member and populate salon details
+    const staff = await Staff.findOne({ phoneNumber }).populate('salonId');
     if (!staff) {
       return res.status(400).json({ msg: 'Invalid credentials' });
+    }
+
+    // Check if staff is active
+    if (!staff.isActive) {
+      return res.status(403).json({ msg: 'Your account is deactivated. Please contact your administrator.' });
+    }
+
+    // Check if salon is approved
+    if (!staff.salonId || staff.salonId.status !== 'approved') {
+      return res.status(403).json({ 
+        msg: 'Your salon registration is still under review. You will be notified once approved.',
+        salonStatus: staff.salonId?.status || 'unknown'
+      });
     }
 
     const isMatch = await bcrypt.compare(password, staff.password);
@@ -122,10 +180,23 @@ exports.sendLoginOtp = async (req, res) => {
 
   const { phoneNumber } = req.body;
   try {
-    // Change this line to check Staff collection instead of Salon
-    const staff = await Staff.findOne({ phoneNumber });
+    // Find the staff member and populate salon details
+    const staff = await Staff.findOne({ phoneNumber }).populate('salonId');
     if (!staff) {
       return res.status(404).json({ msg: 'User with this phone number not found' });
+    }
+
+    // Check if staff is active
+    if (!staff.isActive) {
+      return res.status(403).json({ msg: 'Your account is deactivated. Please contact your administrator.' });
+    }
+
+    // Check if salon is approved
+    if (!staff.salonId || staff.salonId.status !== 'approved') {
+      return res.status(403).json({ 
+        msg: 'Your salon registration is still under review. You will be notified once approved.',
+        salonStatus: staff.salonId?.status || 'unknown'
+      });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -164,10 +235,23 @@ exports.verifyOtpAndLogin = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid or expired OTP' });
     }
     
-    // Change this to find staff instead of salon
-    const staff = await Staff.findOne({ phoneNumber });
+    // Find the staff member and populate salon details
+    const staff = await Staff.findOne({ phoneNumber }).populate('salonId');
     if (!staff) {
       return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Check if staff is active
+    if (!staff.isActive) {
+      return res.status(403).json({ msg: 'Your account is deactivated. Please contact your administrator.' });
+    }
+
+    // Check if salon is approved
+    if (!staff.salonId || staff.salonId.status !== 'approved') {
+      return res.status(403).json({ 
+        msg: 'Your salon registration is still under review. You will be notified once approved.',
+        salonStatus: staff.salonId?.status || 'unknown'
+      });
     }
     
     await redisClient.del(`login-otp:${phoneNumber}`);

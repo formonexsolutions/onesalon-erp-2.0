@@ -5,8 +5,6 @@ import axios from '../api/axiosConfig';
 import { toast } from 'react-toastify';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 // The schema is now much simpler
 const branchSchema = z.object({
   branchName: z.string().min(3, 'Branch name is required'),

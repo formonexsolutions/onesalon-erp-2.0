@@ -59,6 +59,7 @@ const Header = () => {
                     <a href="#reviews" className="text-sm font-semibold leading-6 text-gray-900">Reviews</a>
                 </div>
                 <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
+                    <Link to="/super-admin/login" className="text-sm font-semibold leading-6 text-gray-600 hover:text-gray-900">Super Admin</Link>
                     <Link to="/LoginPage" className="text-sm font-semibold leading-6 text-gray-900">Salon Login</Link>
                     <Link to="/RegisterSalon" className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">Register</Link>
                 </div>
@@ -82,8 +83,9 @@ const Header = () => {
                                     <a href="#reviews" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Reviews</a>
                                 </div>
                                 <div className="py-6">
-                                    <Link to="/login" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Salon Login</Link>
-                                    <Link to="/register" onClick={() => setIsMenuOpen(false)} className="mt-2 -mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white bg-blue-600 hover:bg-blue-500">Register</Link>
+                                    <Link to="/super-admin/login" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-600 hover:bg-gray-50">Super Admin</Link>
+                                    <Link to="/LoginPage" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Salon Login</Link>
+                                    <Link to="/RegisterSalon" onClick={() => setIsMenuOpen(false)} className="mt-2 -mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-white bg-blue-600 hover:bg-blue-500">Register</Link>
                                 </div>
                             </div>
                         </div>

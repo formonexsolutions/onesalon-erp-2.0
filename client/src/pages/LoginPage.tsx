@@ -47,9 +47,23 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(`${BASE_URL}/api/salons/login/password`, data);
-      dispatch(login({ user: response.data, token: 'from_cookie' }));
+      const userData = response.data;
+      dispatch(login({ user: userData, token: 'from_cookie' }));
       toast.success('Login successful!');
-      navigate('/dashboard'); // Instead of '/dashboard'
+      
+      // Redirect based on user role
+      if (userData.role === 'salonadmin') {
+        navigate('/dashboard');
+      } else if (userData.role === 'stylist') {
+        navigate('/stylist-dashboard');
+      } else if (userData.role === 'receptionist') {
+        navigate('/receptionist-dashboard');
+      } else if (userData.role === 'manager') {
+        navigate('/manager-dashboard');
+      } else {
+        // Default fallback
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.msg || 'Login failed.');
     } finally {
@@ -79,9 +93,23 @@ const LoginPage = () => {
         phoneNumber: phoneNumberForOtp,
         otp: data.otp,
       });
-      dispatch(login({ user: response.data, token: 'from_cookie' }));
+      const userData = response.data;
+      dispatch(login({ user: userData, token: 'from_cookie' }));
       toast.success('Login successful!');
-      navigate('/dashboard'); // Instead of '/dashboard'
+      
+      // Redirect based on user role
+      if (userData.role === 'salonadmin') {
+        navigate('/dashboard');
+      } else if (userData.role === 'stylist') {
+        navigate('/stylist-dashboard');
+      } else if (userData.role === 'receptionist') {
+        navigate('/receptionist-dashboard');
+      } else if (userData.role === 'manager') {
+        navigate('/manager-dashboard');
+      } else {
+        // Default fallback
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.msg || 'Invalid OTP.');
     } finally {

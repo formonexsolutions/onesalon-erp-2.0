@@ -1,12 +1,9 @@
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useEffect } from 'react';
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Validation now includes all editable fields
 const branchSchema = z.object({
@@ -49,7 +46,7 @@ const EditBranchForm = ({ isOpen, onClose, onSuccess, branch }: EditBranchFormPr
   const onSubmit = async (data: BranchFormInputs) => {
     if (!branch) return;
     try {
-      await axios.put(`${BASE_URL}/api/branches/${branch._id}`, data, { withCredentials: true });
+      await axios.put(`/api/branches/${branch._id}`, data, { withCredentials: true });
       toast.success('Branch updated successfully!');
       onSuccess();
       onClose();
